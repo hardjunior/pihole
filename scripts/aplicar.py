@@ -195,14 +195,20 @@ def correr_gravity(ph: Pihole) -> int:
         except Exception as e:                      # container ocupado a importar
             print(f"  ... Pi-hole sem resposta ({e.__class__.__name__}), a esperar")
             continue
-        prontas = [l for l in listas if l.get("status") == 1 and l.get("number", 0) > 0]
-        pendentes = [l for l in listas if l not in prontas]
-        print(f"  {len(prontas)}/{len(listas)} listas processadas")
+        # status: 1 = actualizada, 2 = inalterada desde a ultima gravidade (normal numa
+        # repeticao), >=3 = falha de descarga/parsing. So 1 e 2 contam como prontas.
+        prontas = [l for l in listas if l.get("status") in (1, 2) and l.get("number", 0) > 0]
+        falhadas = [l for l in listas if l.get("status", 0) >= 3]
+        pendentes = [l for l in listas if l not in prontas and l not in falhadas]
+        print(f"  {len(prontas)}/{len(listas)} listas processadas"
+              + (f", {len(falhadas)} com falha" if falhadas else ""))
         if not pendentes:
             total = sum(l.get("number", 0) for l in listas)
             print(f"gravity concluido: {total} dominios em {len(listas)} listas "
                   f"({int(time.time() - inicio)} s)")
-            return 0
+            for l in falhadas:
+                print(f"  FALHA {l['address']} (status {l.get('status')})")
+            return 1 if falhadas else 0
     print("gravity: tempo esgotado (verificar /api/lists na UI)")
     return 1
 
@@ -234,7 +240,7 @@ def escrever_dados(perfil: dict, base: str, cofre: Path) -> None:
     try:
         ph = Pihole(base, ler_password(cofre))
         try:
-            activas = {l["address"]: l for l in ph.listas() if l.get("status") == 1}
+            activas = {l["address"]: l for l in ph.listas() if l.get("status") in (1, 2)}
         finally:
             ph.sair()
         total_pihole = 0
