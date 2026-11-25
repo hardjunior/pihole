@@ -1,0 +1,172 @@
+{
+  "projeto": "pihole-familia",
+  "descricao": "Subscrições de bloqueio DNS para o Pi-hole da casa, baseadas no projeto hagezi/dns-blocklists.",
+  "fonte": "https://github.com/hagezi/dns-blocklists",
+  "medido_em": "2026-11-25",
+  "base_url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/",
+  "perfis": {
+    "familia": {
+      "descricao": "Proteção equilibrada: anúncios, rastreadores, malware e phishing, conteúdo adulto, jogos de azar, sites falsos e fuga por DNS encriptado. Escolhido para não partir o uso normal da casa.",
+      "listas": [
+        {
+          "id": "hagezi-pro",
+          "nome": "HaGeZi Multi PRO",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro-onlydomains.txt",
+          "categoria": "base",
+          "porque": "Lista principal equilibrada: anúncios, rastreadores, telemetria, malware, phishing e esquemas. Base de tudo o resto.",
+          "entradas_medidas": 246404
+        },
+        {
+          "id": "hagezi-tif-medium",
+          "nome": "HaGeZi Threat Intelligence Feeds (medium)",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif.medium-onlydomains.txt",
+          "categoria": "seguranca",
+          "porque": "Domínios de malware, phishing, burlas e servidores de comando-e-controlo. Versão medium: a completa tem 882 mil entradas e não cabe bem no contentor do router.",
+          "entradas_medidas": 230856
+        },
+        {
+          "id": "hagezi-nsfw",
+          "nome": "HaGeZi NSFW",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/nsfw-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Conteúdo adulto. É a peça central da proteção das crianças, e a que mais depende de bom senso: não é filtro de escola, é um travão.",
+          "entradas_medidas": 81444
+        },
+        {
+          "id": "hagezi-gambling-mini",
+          "nome": "HaGeZi Gambling (mini)",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/gambling.mini-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Apostas e casinos online. Versão mini para manter o peso baixo; a completa tem 669 mil entradas.",
+          "entradas_medidas": 55332
+        },
+        {
+          "id": "hagezi-fake",
+          "nome": "HaGeZi Fake",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/fake-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Lojas falsas, sites de streaming fraudulentos, armadilhas de subscrição. Ataque típico a quem compra online em casa.",
+          "entradas_medidas": 10346
+        },
+        {
+          "id": "hagezi-doh",
+          "nome": "HaGeZi DoH",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/doh-onlydomains.txt",
+          "categoria": "evasao",
+          "porque": "Endpoints de DNS-sobre-HTTPS. Sem isto, o navegador de um adolescente contorna o Pi-hole em dois cliques nas configurações.",
+          "entradas_medidas": 3576
+        },
+        {
+          "id": "hagezi-dyndns",
+          "nome": "HaGeZi DynDNS",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/dyndns-onlydomains.txt",
+          "categoria": "seguranca",
+          "porque": "Serviços de DNS dinâmico usados para alojar campanhas de phishing. Poucos domínios, risco quase nulo.",
+          "entradas_medidas": 1952
+        },
+        {
+          "id": "hagezi-nosafesearch",
+          "nome": "HaGeZi NoSafeSearch",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/nosafesearch-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Motores de busca que não têm SafeSearch. Força os aparelhos a usar motores que filtram.",
+          "entradas_medidas": 115
+        }
+      ]
+    },
+    "familia-max": {
+      "descricao": "Versão agressiva. Mais cobertura, mais risco de partir sites legítimos, VPNs e jogos online. Não recomendada para uso diário sem alguém disponível para desbloquear.",
+      "avisos": [
+        "A lista doh-vpn-proxy-bypass bloqueia VPN/Tor/proxy e pode interferir com Tailscale, RustDesk ou apps de acesso remoto.",
+        "A lista TIF completa (882 mil) aumenta o consumo de memória do contentor do router.",
+        "Gambling medium e Anti-Piracy bloqueiam também sites de jogos e streaming que podem ser legítimos."
+      ],
+      "listas": [
+        {
+          "id": "hagezi-proplus",
+          "nome": "HaGeZi Multi PRO++",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.plus-onlydomains.txt",
+          "categoria": "base",
+          "porque": "Base mais agressiva que a PRO.",
+          "entradas_medidas": 262161
+        },
+        {
+          "id": "hagezi-tif",
+          "nome": "HaGeZi Threat Intelligence Feeds (completa)",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif-onlydomains.txt",
+          "categoria": "seguranca",
+          "porque": "Todas as fontes de ameaças. Pesada.",
+          "entradas_medidas": 882074
+        },
+        {
+          "id": "hagezi-nsfw",
+          "nome": "HaGeZi NSFW",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/nsfw-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Conteúdo adulto. É a peça central da proteção das crianças, e a que mais depende de bom senso: não é filtro de escola, é um travão.",
+          "entradas_medidas": 81444
+        },
+        {
+          "id": "hagezi-gambling-medium",
+          "nome": "HaGeZi Gambling (medium)",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/gambling.medium-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Apostas, com mais cobertura que a mini.",
+          "entradas_medidas": 74248
+        },
+        {
+          "id": "hagezi-fake",
+          "nome": "HaGeZi Fake",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/fake-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Lojas falsas, sites de streaming fraudulentos, armadilhas de subscrição. Ataque típico a quem compra online em casa.",
+          "entradas_medidas": 10346
+        },
+        {
+          "id": "hagezi-bypass",
+          "nome": "HaGeZi DoH/VPN/Proxy bypass",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/doh-vpn-proxy-bypass-onlydomains.txt",
+          "categoria": "evasao",
+          "porque": "Fecha também VPN, Tor e proxies. Pode partir acesso remoto próprio.",
+          "entradas_medidas": 16527
+        },
+        {
+          "id": "hagezi-social",
+          "nome": "HaGeZi Social",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/social-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Redes sociais clássicas (Facebook, Instagram, TikTok, X, Snapchat).",
+          "entradas_medidas": 8349
+        },
+        {
+          "id": "hagezi-antipiracy",
+          "nome": "HaGeZi Anti-Piracy",
+          "url": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/anti.piracy-onlydomains.txt",
+          "categoria": "familia",
+          "porque": "Sites de pirataria, com o risco conhecido de apanhar serviços legítimos.",
+          "entradas_medidas": 63818
+        }
+      ]
+    }
+  },
+  "canarios": {
+    "anúncios": [
+      "doubleclick.net",
+      "googleadservices.com",
+      "adservice.google.com"
+    ],
+    "adulto": [
+      "pornhub.com",
+      "xvideos.com"
+    ],
+    "apostas": [
+      "bet365.com",
+      "pokerstars.com"
+    ],
+    "controle_negativo": [
+      "wikipedia.org",
+      "sapo.pt",
+      "github.com"
+    ]
+  }
+}

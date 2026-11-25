@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pihole-familia — a rede de casa, fechada por dentro</title>
+<meta name="description" content="Listas de bloqueio DNS de um Pi-hole caseiro: publicidade, rastreadores, malware, conteúdo adulto, apostas e fugas por DNS encriptado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papel:#EDEBE4;
+    --papel-fundo:#E4E1D8;
+    --tinta:#16211D;
+    --tinta-fraca:#42504A;
+    --verde:#1F5B48;
+    --verde-lavado:#D7E0DA;
+    --oxido:#A8402C;
+    --filete:#C3C0B4;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --grotesk:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --largura:66rem;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--papel);
+    color:var(--tinta);
+    font-family:var(--serif);
+    font-size:clamp(1.02rem,.96rem + .25vw,1.16rem);
+    line-height:1.62;
+    font-variant-numeric:oldstyle-nums;
+  }
+  .folha{max-width:var(--largura);margin:0 auto;padding:0 clamp(1.1rem,4vw,3rem)}
+  a{color:var(--verde);text-underline-offset:.18em;text-decoration-thickness:1px}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--oxido);outline-offset:3px}
+  h1,h2,h3{font-family:var(--grotesk);font-weight:800;letter-spacing:-.028em;line-height:1.06;margin:0}
+  h2{font-size:clamp(1.35rem,1.1rem + 1vw,1.85rem);font-weight:600;letter-spacing:-.015em}
+  h3{font-size:1rem;font-weight:600;letter-spacing:0}
+  p{margin:0 0 1rem;max-width:38em}
+  code,kbd{font-family:var(--mono);font-size:.86em}
+
+  /* ---------- cabeçalho ---------- */
+  .topo{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+    padding:1.4rem 0 1.2rem;border-bottom:1px solid var(--filete);font-family:var(--mono);
+    font-size:.8rem;letter-spacing:.01em}
+  .topo strong{font-weight:500;letter-spacing:.02em}
+  .topo span{color:var(--tinta-fraca)}
+
+  /* ---------- herói ---------- */
+  .heroi{position:relative;padding:clamp(2.6rem,6vw,5rem) 0 clamp(2rem,4vw,3rem)}
+  .heroi h1{font-size:clamp(2.05rem,1.3rem + 3.4vw,3.9rem);max-width:19em;margin-bottom:1.4rem}
+  .heroi .linha{display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(1rem,3vw,2.5rem);
+    padding-top:1.4rem;border-top:1px solid var(--filete)}
+  .numero{white-space:nowrap;font-family:var(--mono);font-weight:500;font-size:clamp(2.6rem,1.6rem + 3.6vw,4.2rem);
+    line-height:.9;letter-spacing:-.03em;color:var(--verde);font-variant-numeric:tabular-nums}
+  .numero small{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;
+    color:var(--tinta-fraca);margin-top:.55rem;font-weight:400}
+  .heroi .nota{max-width:24em;font-size:.95rem;color:var(--tinta-fraca);margin:0}
+
+  /* carimbo — o único gesto alto da página */
+  .carimbo{position:absolute;top:clamp(1.4rem,3vw,2.2rem);right:0;
+    transform:rotate(-4.5deg);border:2px solid var(--oxido);border-radius:2px;
+    color:var(--oxido);font-family:var(--mono);font-size:.66rem;line-height:1.25;
+    letter-spacing:.12em;text-transform:uppercase;text-align:center;
+    padding:.5rem .8rem;opacity:.85}
+  .carimbo::after{content:"";position:absolute;inset:3px;border:1px solid var(--oxido);border-radius:1px}
+  @media (max-width:640px){.carimbo{position:static;display:inline-block;transform:rotate(-2deg);margin-bottom:1.5rem}}
+
+  /* ---------- secções ---------- */
+  section{padding:clamp(2.2rem,5vw,3.6rem) 0;border-top:1px solid var(--filete)}
+  .cabeca{display:flex;align-items:baseline;gap:.9rem;margin-bottom:1.6rem}
+  .indice{font-family:var(--mono);font-size:.75rem;color:var(--tinta-fraca);padding-top:.35rem}
+  .cabeca p{margin:.7rem 0 0;color:var(--tinta-fraca);font-size:.95rem}
+
+  /* ---------- tabela de listas ---------- */
+  .listas{margin:0;display:grid;gap:1px;background:var(--filete);border-top:1px solid var(--filete);
+    border-bottom:1px solid var(--filete)}
+  .lista{background:var(--papel);display:grid;
+    grid-template-columns:minmax(15rem,1.5fr) 5.5rem minmax(0,1.35fr) 5.5rem;
+    gap:.4rem 1rem;align-items:center;padding:.85rem .2rem}
+  .lista .nome{font-family:var(--grotesk);font-weight:600;font-size:.96rem;letter-spacing:-.01em}
+  .lista .nome em{font-family:var(--serif);font-style:normal;font-weight:400;display:block;
+    color:var(--tinta-fraca);font-size:.82rem;margin-top:.18rem;line-height:1.45;max-width:26em}
+  .etiqueta{font-family:var(--mono);font-size:.68rem;letter-spacing:.02em;text-transform:lowercase;
+    color:var(--verde);background:var(--verde-lavado);padding:.18rem .4rem;border-radius:2px;
+    justify-self:start;white-space:nowrap}
+  .barra{height:3px;background:var(--verde);border-radius:0;min-width:2px}
+  .barra.calcada{background:var(--filete);height:3px;position:relative}
+  .cifra{font-family:var(--mono);font-size:.8rem;font-variant-numeric:tabular-nums;text-align:right;
+    color:var(--tinta)}
+  @media (max-width:720px){
+    .lista{grid-template-columns:1fr auto;grid-template-areas:"nome cifra" "etiqueta barra"}
+    .lista .nome{grid-area:nome}.cifra{grid-area:cifra}.etiqueta{grid-area:etiqueta}
+    .barra,.barra.calcada{grid-area:barra;width:100%}
+  }
+
+  /* ---------- diagrama ---------- */
+  .fluxo{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:1.8rem 0 .6rem;
+    border:1px solid var(--filete)}
+  .fluxo > div{padding:1rem 1.1rem;font-size:.88rem;line-height:1.45;position:relative}
+  .fluxo > div + div{border-left:1px solid var(--filete)}
+  .fluxo strong{font-family:var(--grotesk);font-weight:600;display:block;font-size:.95rem;margin-bottom:.2rem}
+  .fluxo span{font-family:var(--mono);font-size:.7rem;color:var(--tinta-fraca);display:block;margin-top:.35rem}
+  .fluxo .bloqueio{background:var(--verde-lavado)}
+  .fluxo .bloqueio strong{color:var(--verde)}
+  .legenda{font-family:var(--mono);font-size:.72rem;color:var(--tinta-fraca);margin:0 0 1.2rem}
+  @media (max-width:720px){
+    .fluxo{grid-template-columns:1fr}
+    .fluxo > div + div{border-left:0;border-top:1px solid var(--filete)}
+  }
+
+  /* ---------- código ---------- */
+  pre{background:var(--papel-fundo);border-left:2px solid var(--verde);margin:1.2rem 0;
+    padding:1rem 1.1rem;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.7}
+  pre .c{color:var(--tinta-fraca)}
+
+  /* ---------- limites ---------- */
+  ul.limites{list-style:none;padding:0;margin:1.2rem 0 0;display:grid;gap:.9rem}
+  ul.limites li{display:grid;grid-template-columns:auto 1fr;gap:.8rem;max-width:44em}
+  ul.limites li::before{content:"—";font-family:var(--mono);color:var(--oxido)}
+
+  footer{border-top:1px solid var(--filete);padding:2rem 0 3.5rem;font-family:var(--mono);
+    font-size:.74rem;line-height:1.9;color:var(--tinta-fraca)}
+  footer a{color:var(--tinta)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="folha">
+
+  <header class="topo">
+    <strong>pihole-familia</strong>
+    <span>Pi-hole no MikroTik, rede da casa</span>
+  </header>
+
+  <div class="heroi">
+    <div class="carimbo">rede<br>protegida<br><span id="carimbo-data">25.11.2026</span></div>
+    <h1>Tudo o que a casa não precisa de ver fica fechado antes de sair do router.</h1>
+    <div class="linha">
+      <div class="numero" id="total">629 927<small>domínios bloqueados em <span id="n-listas">8</span> listas</small></div>
+      <p class="nota">Um Pi-hole em container no MikroTik responde por toda a rede: portáteis, telemóveis,
+      televisão, a VLAN da domótica. Sem instalar nada em aparelho nenhum.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="cabeca">
+      <div class="indice">01</div>
+      <div>
+        <h2>O que fica fechado</h2>
+        <p>Oito listas, cada uma com um trabalho. A base apanha publicidade e rastreadores; as outras
+        fecham aquilo que a base não vê — ameaças, conteúdo adulto, apostas, sites falsos e a fuga por
+        DNS encriptado.</p>
+      </div>
+    </div>
+    <div class="listas" id="listas">
+      <!-- cópia estática de docs/dados.json; o JavaScript actualiza, sem ele isto já está certo -->
+      <div class="lista"><div class="nome">HaGeZi Multi PRO<em>Lista principal equilibrada: anúncios, rastreadores, telemetria, malware, phishing e esquemas. Base de tudo o resto.</em></div><div class="etiqueta">base</div><div class="barra" style="width:100.0%"></div><div class="cifra">246 391</div></div>
+      <div class="lista"><div class="nome">HaGeZi Threat Intelligence Feeds (medium)<em>Domínios de malware, phishing, burlas e servidores de comando-e-controlo. Versão medium: a completa tem 882 mil entradas e não cabe bem no contentor do router.</em></div><div class="etiqueta">seguranca</div><div class="barra" style="width:93.7%"></div><div class="cifra">230 844</div></div>
+      <div class="lista"><div class="nome">HaGeZi NSFW<em>Conteúdo adulto. É a peça central da proteção das crianças, e a que mais depende de bom senso: não é filtro de escola, é um travão.</em></div><div class="etiqueta">familia</div><div class="barra" style="width:33.0%"></div><div class="cifra">81 432</div></div>
+      <div class="lista"><div class="nome">HaGeZi Gambling (mini)<em>Apostas e casinos online. Versão mini para manter o peso baixo; a completa tem 669 mil entradas.</em></div><div class="etiqueta">familia</div><div class="barra" style="width:22.5%"></div><div class="cifra">55 320</div></div>
+      <div class="lista"><div class="nome">HaGeZi Fake<em>Lojas falsas, sites de streaming fraudulentos, armadilhas de subscrição. Ataque típico a quem compra online em casa.</em></div><div class="etiqueta">familia</div><div class="barra" style="width:4.2%"></div><div class="cifra">10 334</div></div>
+      <div class="lista"><div class="nome">HaGeZi DoH<em>Endpoints de DNS-sobre-HTTPS. Sem isto, o navegador de um adolescente contorna o Pi-hole em dois cliques nas configurações.</em></div><div class="etiqueta">evasao</div><div class="barra" style="width:1.4%"></div><div class="cifra">3 563</div></div>
+      <div class="lista"><div class="nome">HaGeZi DynDNS<em>Serviços de DNS dinâmico usados para alojar campanhas de phishing. Poucos domínios, risco quase nulo.</em></div><div class="etiqueta">seguranca</div><div class="barra" style="width:0.8%"></div><div class="cifra">1 940</div></div>
+      <div class="lista"><div class="nome">HaGeZi NoSafeSearch<em>Motores de busca que não têm SafeSearch. Força os aparelhos a usar motores que filtram.</em></div><div class="etiqueta">familia</div><div class="barra" style="width:0.6%"></div><div class="cifra">103</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cabeca">
+      <div class="indice">02</div>
+      <div>
+        <h2>Como a consulta morre</h2>
+        <p>Nada é instalado nos aparelhos. O aparelho pergunta um nome, o router responde antes de a
+        pergunta sair de casa — e o que está na lista recebe <code>0.0.0.0</code>, um endereço que não
+        leva a lado nenhum.</p>
+      </div>
+    </div>
+    <div class="fluxo">
+      <div><strong>O aparelho</strong>Pediu <code>exemplo.com</code>. Recebeu o DNS da rede por DHCP,
+      não escolheu nada.<span>portátil, telemóvel, TV, domótica</span></div>
+      <div class="bloqueio"><strong>O Pi-hole</strong>Compara com 711 mil domínios. Está na lista?
+      Responde <code>0.0.0.0</code> e a ligação nunca chega a existir.<span>192.168.88.5</span></div>
+      <div><strong>A internet</strong>Só vê as consultas que passaram. O domínio bloqueado não sabe
+      que a casa existe.<span>upstream 8.8.8.8</span></div>
+    </div>
+    <p class="legenda">O router reforça isto por fora do DNS: todas as consultas à porta 53 são
+    redireccionadas para o Pi-hole, e o DNS-sobre-TLS (853) é rejeitado — as duas portas por onde um
+    aparelho tentaria escolher outro resolvedor.</p>
+  </section>
+
+  <section>
+    <div class="cabeca">
+      <div class="indice">03</div>
+      <div>
+        <h2>Aplicar, verificar, reverter</h2>
+        <p>O repositório é a fonte de verdade: as listas estão num ficheiro, um script sincroniza-as com
+        o Pi-hole, outro mede se estão mesmo a bloquear. Correr duas vezes não duplica nada.</p>
+      </div>
+    </div>
+<pre><span class="c"># subscrever o perfil "familia" e reconstruir a base</span>
+./scripts/aplicar.py
+
+<span class="c"># ver o que mudaria, sem tocar em nada</span>
+./scripts/aplicar.py --ensaio
+
+<span class="c"># provar que bloqueia o que devia e não bloqueia o que não devia</span>
+./scripts/verificar.py</pre>
+    <p>Os canários são a parte que interessa: um domínio de publicidade tem de dar <code>0.0.0.0</code>
+    e um site normal tem de continuar a resolver. Sem o segundo teste, um Pi-hole partido parece
+    um Pi-hole a proteger.</p>
+  </section>
+
+  <section>
+    <div class="cabeca">
+      <div class="indice">04</div>
+      <div>
+        <h2>O que isto não faz</h2>
+        <p>Escrito antes de prometer protecção, porque é aqui que as pessoas se enganam.</p>
+      </div>
+    </div>
+    <ul class="limites">
+      <li><span>Não bloqueia anúncios do YouTube, Spotify ou Twitch. Saem do mesmo domínio que o
+      vídeo — nenhum DNS separa anúncio de conteúdo.</span></li>
+      <li><span>Uma VPN ou um DNS privado configurado no telefone passa por cima. Em casa há a rede a
+      travar; fora de casa só o aparelho protegeria.</span></li>
+      <li><span>Não é controlo parental: filtra destinos conhecidos, não lê tráfego, mensagens nem
+      palavras.</span></li>
+      <li><span>Falsos positivos existem. Desbloqueia-se um domínio de cada vez, não a lista
+      toda.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    Listas: <a href="https://github.com/hagezi/dns-blocklists">HaGeZi DNS Blocklists</a> — mérito do autor.
+    Configuração, scripts e esta página: <a href="https://github.com/hardjunior/pihole">hardjunior/pihole</a>, MIT.<br>
+    Números medidos a <span id="rodape-data">2026-11-25</span> com <code>aplicar.py --dados</code>;
+    actualizados a cada <code>gravity</code>.
+  </footer>
+
+</div>
+<script>
+  // Actualiza os números com o que está medido em docs/dados.json (se existir).
+  fetch("dados.json?v=" + Date.now(), {cache:"no-store"}).then(r => r.ok ? r.json() : null).then(d => {
+    if (!d || !d.listas) return;
+    const fmt = n => n.toLocaleString("pt-PT").replace(/\u00A0|\u202F/g, "\u2009");
+    const valor = l => l.no_pihole ?? l.entradas;
+    const total = d.total_pihole || d.total;
+    const max = Math.max(...d.listas.map(valor));
+    document.getElementById("total").innerHTML =
+      fmt(total) + '<small>domínios bloqueados em ' + d.listas.length + " listas</small>";
+    document.getElementById("n-listas").textContent = d.listas.length;
+    document.getElementById("listas").innerHTML = d.listas.map(l =>
+      '<div class="lista">' +
+        '<div class="nome">' + l.nome + "<em>" + l.porque + "</em></div>" +
+        '<div class="etiqueta">' + l.categoria + "</div>" +
+        '<div class="barra" style="width:' + Math.max(0.6, valor(l) / max * 100).toFixed(1) + '%"></div>' +
+        '<div class="cifra">' + fmt(valor(l)) + "</div>" +
+      "</div>").join("");
+    const [a,m,dia] = d.medido_em.split("-");
+    const legivel = dia + "." + m + "." + a;
+    document.getElementById("rodape-data").textContent = d.medido_em;
+    document.getElementById("carimbo-data").textContent = legivel;
+  }).catch(() => {});
+</script>
+</body>
+</html>
